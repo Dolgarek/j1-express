@@ -16,7 +16,7 @@ teamRouter.get('/', validateQuery(TeamQuerySchema), async (_req, res) => {
 
 // GET /api/teams/:id
 teamRouter.get('/:id', async (req, res) => {
-  const team = await teams.findOne(parseId(req.params.id, 'Team'));
+  const team = await teams.findOneWithPlayers(parseId(req.params.id, 'Team'));
   if (!team) throw new HttpError(404, 'Team not found');
   res.json(team);
 });

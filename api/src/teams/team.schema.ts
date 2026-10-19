@@ -1,11 +1,17 @@
 // Les types et les schémas de validation de Team. Hier : l'entité Team + ses #[Assert\…].
 import { z } from 'zod';
+import type { PlayerSummary } from '../players/player.schema.js';
 
 export interface Team {
   id: number;
   name: string;
   tag: string;
   country: string;
+}
+
+/** GET /api/teams/:id : l'équipe et ses joueurs */
+export interface TeamWithPlayers extends Team {
+  players: PlayerSummary[];
 }
 
 // Ce que le client a le droit d'envoyer (POST). Hier : NotBlank, Length, Regex, Country.
