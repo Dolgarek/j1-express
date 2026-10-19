@@ -2,7 +2,7 @@
 // est une requête écrite à la main (LEFT JOIN + json_build_object).
 import { query } from '../db.js';
 import { BaseRepository } from '../repository.js';
-import type { Player, PlayerSearch, PlayerSummary, PlayerView } from './player.schema.js';
+import type { Player, PlayerSearch, PlayerSummary, PlayerView, TopQuery } from './player.schema.js';
 
 // La « vue » d'un joueur : sans birth_date, avec son équipe réduite à { id, name, tag } (ou null)
 const VIEW_COLUMNS = `p.id, p.nickname, p.country, p.role, p.rating,
@@ -58,6 +58,17 @@ class PlayerRepository extends BaseRepository<Player> {
   private async countWhere(where: string, values: unknown[]): Promise<number> {
     const [row] = await query<{ count: string }>(`SELECT count(*) AS count FROM player p ${where}`, values);
     return Number(row?.count ?? 0);
+  }
+
+  /** Les meilleurs joueurs (rating décroissant), éventuellement d'un pays. */
+  findTop({ limit, country }: TopQuery): Promise<PlayerView[]> {
+    return query<PlayerView>(
+      `${VIEW}
+       WHERE $1::text IS NULL OR p.country = $1
+       ORDER BY p.rating DESC, p.nickname
+       LIMIT $2`,
+      [country ?? null, limit],
+    );
   }
 
   /** Les joueurs d'une équipe, pour GET /api/teams/:id. */

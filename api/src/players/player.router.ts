@@ -4,7 +4,7 @@ import { HttpError } from '../errors.js';
 import { parseId } from '../middlewares/params.js';
 import { validate, validateQuery } from '../middlewares/validate.js';
 import { players } from './player.repository.js';
-import { PlayerPatchSchema, PlayerSchema, PlayerSearchSchema, type PlayerInput, type PlayerSearch } from './player.schema.js';
+import { PlayerPatchSchema, PlayerSchema, PlayerSearchSchema, TopQuerySchema, type PlayerInput, type PlayerSearch, type TopQuery } from './player.schema.js';
 
 export const playerRouter = Router();
 
@@ -12,6 +12,11 @@ export const playerRouter = Router();
 playerRouter.get('/', validateQuery(PlayerSearchSchema), async (_req, res) => {
   const { items, total } = await players.search(res.locals.query as PlayerSearch);
   res.set('X-Total-Count', String(total)).json(items);
+});
+
+// GET /api/players/top?limit=3&country=IS — déclarée AVANT /:id, sinon « top » est pris pour un id
+playerRouter.get('/top', validateQuery(TopQuerySchema), async (_req, res) => {
+  res.json(await players.findTop(res.locals.query as TopQuery));
 });
 
 // GET /api/players/:id

@@ -61,3 +61,14 @@ export const PlayerSearchSchema = z.object({
   q: z.string().trim().min(1).optional(),
 });
 export type PlayerSearch = z.infer<typeof PlayerSearchSchema>;
+
+// ?limit=3&country=is pour le classement
+export const TopQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  country: z
+    .string()
+    .regex(/^[A-Za-z]{2}$/)
+    .transform((s) => s.toUpperCase())
+    .optional(),
+});
+export type TopQuery = z.infer<typeof TopQuerySchema>;

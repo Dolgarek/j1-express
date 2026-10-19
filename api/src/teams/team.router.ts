@@ -1,6 +1,8 @@
 // Les routes de Team. Hier : TeamController.
 import { Router } from 'express';
 import { HttpError } from '../errors.js';
+import { SeedQuerySchema, type SeedQuery } from '../matches/match.schema.js';
+import { simulate } from '../matches/simulator.js';
 import { parseId } from '../middlewares/params.js';
 import { validate, validateQuery } from '../middlewares/validate.js';
 import { teams } from './team.repository.js';
@@ -19,6 +21,23 @@ teamRouter.get('/:id', async (req, res) => {
   const team = await teams.findOneWithPlayers(parseId(req.params.id, 'Team'));
   if (!team) throw new HttpError(404, 'Team not found');
   res.json(team);
+});
+
+// GET /api/teams/:id/versus/:opponentId[?seed=42] : un match simulé, rien n'est enregistré
+teamRouter.get('/:id/versus/:opponentId', validateQuery(SeedQuerySchema), async (req, res) => {
+  const id = parseId(req.params.id, 'Team');
+  const opponentId = parseId(req.params.opponentId, 'Team');
+  const { seed } = res.locals.query as SeedQuery;
+
+  const [team, opponent] = await Promise.all([teams.findOne(id), teams.findOne(opponentId)]);
+  if (!team || !opponent) throw new HttpError(404, 'Team not found');
+  if (id === opponentId) throw new HttpError(422, 'Validation Failed', [{ path: 'opponentId', message: 'a team cannot play against itself' }]);
+
+  const [rating, opponentRating] = await Promise.all([teams.ratingOf(id), teams.ratingOf(opponentId)]);
+  if (rating === null) throw new HttpError(422, 'Validation Failed', [{ path: 'id', message: 'team has no players' }]);
+  if (opponentRating === null) throw new HttpError(422, 'Validation Failed', [{ path: 'opponentId', message: 'team has no players' }]);
+
+  res.json(simulate({ ...team, rating }, { ...opponent, rating: opponentRating }, seed));
 });
 
 // POST /api/teams
