@@ -6,9 +6,13 @@ import { gameRouter } from './games/game.router.js';
 import { healthRouter } from './health.router.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFound } from './middlewares/notFound.js';
+import { requestLogger } from './middlewares/requestLogger.js';
 import { requireJson } from './middlewares/requireJson.js';
 
 const app = express();
+
+// 0. En tout premier : voir passer TOUTES les requêtes, même celles qui finiront en 404 ou en erreur.
+app.use(requestLogger);
 
 // 1. Lire les corps JSON dans req.body (sinon req.body vaut undefined). JSON illisible → erreur 400.
 app.use(express.json());
