@@ -2,15 +2,16 @@
 import { Router } from 'express';
 import { HttpError } from '../errors.js';
 import { parseId } from '../middlewares/params.js';
-import { validate } from '../middlewares/validate.js';
+import { validate, validateQuery } from '../middlewares/validate.js';
 import { players } from './player.repository.js';
-import { PlayerPatchSchema, PlayerSchema, type PlayerInput } from './player.schema.js';
+import { PlayerPatchSchema, PlayerSchema, PlayerSearchSchema, type PlayerInput, type PlayerSearch } from './player.schema.js';
 
 export const playerRouter = Router();
 
-// GET /api/players
-playerRouter.get('/', async (_req, res) => {
-  res.json(await players.findViews());
+// GET /api/players?page=&limit=&country=&teamId=&q= : une page, le total dans un en-tête
+playerRouter.get('/', validateQuery(PlayerSearchSchema), async (_req, res) => {
+  const { items, total } = await players.search(res.locals.query as PlayerSearch);
+  res.set('X-Total-Count', String(total)).json(items);
 });
 
 // GET /api/players/:id

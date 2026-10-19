@@ -47,3 +47,17 @@ export const PlayerSchema = z.object({
 });
 export type PlayerInput = z.infer<typeof PlayerSchema>;
 export const PlayerPatchSchema = PlayerSchema.partial();
+
+// ?page=2&limit=5&country=fr&teamId=3&q=zer : les paramètres de requête sont des chaînes → z.coerce
+export const PlayerSearchSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  country: z
+    .string()
+    .regex(/^[A-Za-z]{2}$/)
+    .transform((s) => s.toUpperCase())
+    .optional(),
+  teamId: z.coerce.number().int().positive().optional(),
+  q: z.string().trim().min(1).optional(),
+});
+export type PlayerSearch = z.infer<typeof PlayerSearchSchema>;
