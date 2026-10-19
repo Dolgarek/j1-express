@@ -48,3 +48,13 @@ INSERT INTO player (nickname, country, role, rating, birth_date, team_id) VALUES
   ('Blame', 'FR', 'defender', 2190, '2001-06-15', 8),
   ('Glitch', 'FR', NULL, 2210, NULL, NULL),
   ('Lagger', 'BE', NULL, 1500, NULL, NULL);
+
+-- TP : six matchs, quatre joués (score et gagnant fixés) et deux programmés.
+-- team_id : 1 NUL, 2 KPN, 3 LAG, 4 STK, 5 404, 6 SEG, 7 SDO, 8 MRG
+INSERT INTO match (team_a_id, team_b_id, score_a, score_b, winner_id, played_at) VALUES
+  (1, 2, 3, 1, 1, '2026-10-03 20:00:00+02'),
+  (3, 4, 2, 3, 4, '2026-10-03 21:00:00+02'),
+  (5, 6, 3, 2, 5, '2026-10-10 20:00:00+02'),
+  (7, 8, 0, 3, 8, '2026-10-10 21:00:00+02'),
+  (1, 4, NULL, NULL, NULL, NULL),
+  (5, 8, NULL, NULL, NULL, NULL);
